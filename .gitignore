@@ -1,0 +1,39 @@
+# Environments & Secrets
+node_modules/
+venv/
+env/
+.env
+.env.*
+.env.local
+
+# Databases
+*.sqlite
+*.sqlite3
+*.db
+database.sqlite
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Node/Vite Build Outputs
+dist/
+build/
+.output/
+
+# Machine Learning Models (don't push heavy weights unless needed)
+ai-engine/models/*.pt
+ai-engine/models/*.h5
+ai-engine/models/*.bin
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
