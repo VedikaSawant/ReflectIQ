@@ -1,0 +1,216 @@
+.table-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+
+.table-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #f8fafc;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-count {
+  background: rgba(99,102,241,0.2);
+  color: #a5b4fc;
+  border-radius: 20px;
+  padding: 1px 9px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.table-search {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #f8fafc;
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  width: 200px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.table-search:focus {
+  border-color: rgba(99,102,241,0.5);
+}
+
+.table-search::placeholder {
+  color: rgba(255,255,255,0.25);
+}
+
+.table-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.detections-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.detections-table thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(15,17,26,0.95);
+  backdrop-filter: blur(10px);
+  padding: 9px 14px;
+  text-align: left;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(255,255,255,0.35);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  white-space: nowrap;
+}
+
+.table-row {
+  transition: background 0.15s;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.table-row:hover {
+  background: rgba(99,102,241,0.08);
+}
+
+.detections-table td {
+  padding: 9px 14px;
+  color: rgba(255,255,255,0.65);
+  white-space: nowrap;
+}
+
+.id-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.35) !important;
+}
+
+.img-cell {
+  padding: 4px 10px !important;
+  width: 50px;
+}
+
+.table-thumb {
+  width: 40px;
+  height: 30px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.table-thumb-placeholder {
+  width: 40px;
+  height: 30px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.02);
+  border: 1px dashed rgba(255,255,255,0.1);
+}
+
+.label-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+}
+
+.ri-cell {
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+}
+
+.status-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid;
+}
+
+.weather-cell {
+  color: rgba(255,255,255,0.5) !important;
+}
+
+.gps-cell, .time-cell {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+}
+
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+
+.page-info {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.35);
+}
+
+.pagination {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.page-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.5);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: rgba(99,102,241,0.2);
+  color: #a5b4fc;
+  border-color: rgba(99,102,241,0.3);
+}
+
+.page-btn.active {
+  background: rgba(99,102,241,0.3);
+  color: #a5b4fc;
+  border-color: rgba(99,102,241,0.5);
+}
+
+.page-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}

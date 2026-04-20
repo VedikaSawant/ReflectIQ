@@ -1,0 +1,146 @@
+.export-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.export-heading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.4);
+  margin: 0 0 0.75rem 0;
+}
+
+.export-summary, .export-actions, .irc-thresholds {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem;
+}
+
+.export-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.kpi-item {
+  text-align: center;
+  padding: 0.6rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.kpi-val {
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.kpi-label {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.export-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.export-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(99,102,241,0.07);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: 12px;
+  padding: 1rem 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-card:hover {
+  background: rgba(99,102,241,0.15);
+  border-color: rgba(99,102,241,0.4);
+  transform: translateX(4px);
+}
+
+.export-card-icon {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+}
+
+.export-card-info {
+  flex: 1;
+}
+
+.export-card-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #c7d2fe;
+  margin-bottom: 3px;
+}
+
+.export-card-desc {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+  line-height: 1.4;
+}
+
+.export-arrow {
+  font-size: 1.25rem;
+  color: rgba(99,102,241,0.6);
+  flex-shrink: 0;
+}
+
+.threshold-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.threshold-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  font-size: 0.78rem;
+}
+
+.threshold-label {
+  color: rgba(255,255,255,0.65);
+  font-weight: 600;
+}
+
+.threshold-val {
+  color: #f59e0b;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.threshold-val span {
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.3);
+  margin-left: 3px;
+}
+
+.threshold-ref {
+  color: rgba(99,102,241,0.7);
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: rgba(99,102,241,0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
