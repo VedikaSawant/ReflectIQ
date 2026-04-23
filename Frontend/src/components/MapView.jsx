@@ -20,21 +20,38 @@ const TILE_LAYERS = {
 };
 
 function TileLayerSwitcher({ layer }) {
-  const map = useMap();
   return <TileLayer url={TILE_LAYERS[layer].url} attribution={TILE_LAYERS[layer].attribution} />;
+}
+
+// Moves the map to the center of actual detections whenever they change
+function AutoCenter({ detections }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const valid = detections.filter(d => d.lat != null && d.lon != null);
+    if (valid.length === 0) return;
+
+    const avgLat = valid.reduce((s, d) => s + d.lat, 0) / valid.length;
+    const avgLon = valid.reduce((s, d) => s + d.lon, 0) / valid.length;
+    map.setView([avgLat, avgLon], 13, { animate: true });
+  }, [detections]);
+
+  return null;
 }
 
 export default function MapView({ filters, onSelectDetection, detections = [] }) {
   const [tileLayer, setTileLayer] = useState('dark');
 
+  // ── FIX 1: depend on both detections AND filters so map updates when data loads
   const filtered = useMemo(() => {
     return detections.filter((d) => {
+      if (d.lat == null || d.lon == null) return false; // skip null GPS
       if (filters.status !== 'all' && d.status !== filters.status) return false;
       if (filters.label !== 'all' && d.label !== filters.label) return false;
       if (filters.weather !== 'all' && d.weather !== filters.weather) return false;
       return true;
     });
-  }, [filters]);
+  }, [detections, filters]); // ← detections added here
 
   return (
     <div className="map-wrapper">
@@ -57,13 +74,18 @@ export default function MapView({ filters, onSelectDetection, detections = [] })
         </div>
       </div>
 
+      {/* ── FIX 2: center starts at [0,0] — AutoCenter moves it to real data ── */}
       <MapContainer
-        center={[18.542, 73.903]}
-        zoom={13}
+        center={[0, 0]}
+        zoom={2}
         style={{ width: '100%', height: '100%' }}
         zoomControl={true}
       >
         <TileLayerSwitcher layer={tileLayer} />
+
+        {/* Automatically pans to wherever the detections actually are */}
+        <AutoCenter detections={detections} />
+
         {filtered.map((det) => (
           <CircleMarker
             key={det.id}
@@ -86,29 +108,35 @@ export default function MapView({ filters, onSelectDetection, detections = [] })
                     <div className="popup-id">{det.id}</div>
                   </div>
                 </div>
+                {/* ── FIX 3: was det.riScore (camelCase mock) — API returns ri_score ── */}
                 <div className="popup-row">
                   <span>RI Score</span>
-                  <strong style={{ color: STATUS_COLORS[det.status] }}>{det.riScore} mcd/lx/m²</strong>
+                  <strong style={{ color: STATUS_COLORS[det.status] }}>
+                    {det.ri_score ?? det.riScore} mcd/lx/m²
+                  </strong>
                 </div>
                 <div className="popup-row">
                   <span>Status</span>
-                  <strong style={{ color: STATUS_COLORS[det.status], textTransform: 'capitalize' }}>{det.status}</strong>
+                  <strong style={{ color: STATUS_COLORS[det.status], textTransform: 'capitalize' }}>
+                    {det.status}
+                  </strong>
                 </div>
                 <div className="popup-row">
                   <span>Confidence</span>
-                  <strong>{(det.confidence * 100).toFixed(0)}%</strong>
+                  <strong>{((det.confidence ?? 0) * 100).toFixed(0)}%</strong>
                 </div>
                 <div className="popup-row">
                   <span>Weather</span>
                   <strong>{WEATHER_DISPLAY[det.weather]}</strong>
                 </div>
+                {/* ── FIX 4: was det.kmMarker — API returns km_marker ── */}
                 <div className="popup-row">
                   <span>KM Marker</span>
-                  <strong>KM {det.kmMarker}</strong>
+                  <strong>KM {det.km_marker ?? det.kmMarker ?? 'N/A'}</strong>
                 </div>
                 <div className="popup-row">
                   <span>GPS</span>
-                  <strong>{det.lat}°N, {det.lon}°E</strong>
+                  <strong>{det.lat}°, {det.lon}°</strong>
                 </div>
               </div>
             </Popup>

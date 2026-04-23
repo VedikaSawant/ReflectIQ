@@ -29,6 +29,32 @@ const STATUS_LABEL = {
   all: 'All Status', red: '🔴 Critical', yellow: '🟡 Warning', green: '🟢 Compliant',
 };
 
+// ── Derive a human-readable location label from GPS coordinates ──────────────
+function getLocationLabel(detections) {
+  const valid = detections.filter(d => d.lat != null && d.lon != null);
+  if (valid.length === 0) return 'Location Unknown';
+
+  const avgLat = valid.reduce((s, d) => s + d.lat, 0) / valid.length;
+  const avgLon = valid.reduce((s, d) => s + d.lon, 0) / valid.length;
+
+  // Rough bounding-box country/region detection
+  if (avgLat >= 33 && avgLat <= 43 && avgLon >= 124 && avgLon <= 132) return 'South Korea';
+  if (avgLat >= 8 && avgLat <= 37 && avgLon >= 68 && avgLon <= 97) return 'India';
+  if (avgLat >= 35 && avgLat <= 72 && avgLon >= -10 && avgLon <= 40) return 'Europe';
+  if (avgLat >= 24 && avgLat <= 50 && avgLon >= -125 && avgLon <= -65) return 'United States';
+  if (avgLat >= -44 && avgLat <= -10 && avgLon >= 112 && avgLon <= 154) return 'Australia';
+
+  // Fallback: show raw coordinates
+  return `${avgLat.toFixed(4)}°, ${avgLon.toFixed(4)}°`;
+}
+
+// ── Compute surveyed km from max km_marker in detections ─────────────────────
+function getTotalKm(detections) {
+  if (!detections.length) return 0;
+  const max = Math.max(...detections.map(d => d.km_marker ?? d.kmMarker ?? 0));
+  return max > 0 ? parseFloat(max.toFixed(1)) : 0;
+}
+
 export default function App() {
   const [tab, setTab] = useState('map');
   const [filters, setFilters] = useState({ status: 'all', label: 'all', weather: 'all' });
@@ -39,8 +65,11 @@ export default function App() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Derived from real data — no hardcoding
+  const locationLabel = getLocationLabel(detections);
+  const totalKm = getTotalKm(detections);
+
   useEffect(() => {
-    // Fetch from real backend
     fetch('http://localhost:8000/api/detections')
       .then(res => res.json())
       .then(data => {
@@ -50,12 +79,12 @@ export default function App() {
       .then(res => res.json())
       .then(sumData => {
         setSummary({
-          totalKm: 19.4,
+          totalKm: getTotalKm([]),   // will be overwritten by derived value
           totalDetections: sumData.total,
           critical: sumData.critical,
           warning: sumData.warning,
           compliant: sumData.compliant,
-          avgRI: sumData.avg_ri
+          avgRI: sumData.avg_ri,
         });
         setLoading(false);
       })
@@ -69,9 +98,25 @@ export default function App() {
       });
   }, []);
 
-  const setFilter = (key, val) => setFilters((f) => ({ ...f, [key]: val }));
+  // Keep summary.totalKm in sync with real detections
+  useEffect(() => {
+    if (summary && detections.length > 0) {
+      setSummary(s => ({ ...s, totalKm }));
+    }
+  }, [detections, totalKm]);
 
+  const setFilter = (key, val) => setFilters((f) => ({ ...f, [key]: val }));
   const showFilters = tab === 'map' || tab === 'analytics' || tab === 'detections';
+
+  // Breadcrumb: dynamic based on actual data
+  const breadcrumb = detections.length > 0
+    ? `${locationLabel} · KM 0 – ${totalKm}`
+    : 'No survey data loaded';
+
+  // Sidebar corridor info: dynamic
+  const corridorInfo = detections.length > 0
+    ? `${locationLabel} · ${new Date().toLocaleString('en-GB', { month: 'short', year: 'numeric' })}`
+    : 'No data';
 
   return (
     <div className="app">
@@ -112,7 +157,8 @@ export default function App() {
                 <span className="badge-dot pulse" />
                 <span>Live Survey Active</span>
               </div>
-              <div className="corridor-info">NH-48 · Pune · Apr 2026</div>
+              {/* ── FIX 1: was hardcoded "NH-48 · Pune · Apr 2026" ── */}
+              <div className="corridor-info">{corridorInfo}</div>
             </>
           )}
         </div>
@@ -124,9 +170,10 @@ export default function App() {
         <header className="topbar">
           <div className="topbar-left">
             <h1 className="page-title">
-              {TABS.find((t) => t.id === tab)?.icon}&nbsp; {TABS.find((t) => t.id === tab)?.label}
+              {TABS.find((t) => t.id === tab)?.icon}&nbsp;{TABS.find((t) => t.id === tab)?.label}
             </h1>
-            <div className="breadcrumb">NH-48 Pune Corridor · KM 0 – 19.4</div>
+            {/* ── FIX 2: was hardcoded "NH-48 Pune Corridor · KM 0 – 19.4" ── */}
+            <div className="breadcrumb">{breadcrumb}</div>
           </div>
           {showFilters && (
             <div className="filter-bar">
@@ -174,7 +221,11 @@ export default function App() {
         </header>
 
         {/* Stats */}
-        {loading ? <div style={{padding: '20px'}}>Loading...</div> : <StatBar summary={summary} />}
+        {/* ── FIX 3: summary.totalKm now comes from real data, not hardcoded 19.4 ── */}
+        {loading
+          ? <div style={{ padding: '20px' }}>Loading...</div>
+          : <StatBar summary={{ ...summary, totalKm }} />
+        }
 
         {/* Content */}
         <div className="content-area">
@@ -192,32 +243,46 @@ export default function App() {
                   <div className="detail-body">
                     {selectedDetection.image_path && (
                       <div className="detail-image-wrapper">
-                        <img src={`http://localhost:8000${selectedDetection.image_path}`} alt="Detection Crop" className="detail-image" />
+                        <img
+                          src={`http://localhost:8000${selectedDetection.image_path}`}
+                          alt="Detection Crop"
+                          className="detail-image"
+                        />
                       </div>
                     )}
                     <div className="detail-id">{selectedDetection.id}</div>
                     <div
                       className="detail-status"
                       style={{
-                        color: selectedDetection.status === 'red' ? '#ef4444' : selectedDetection.status === 'yellow' ? '#f59e0b' : '#22c55e',
+                        color: selectedDetection.status === 'red'
+                          ? '#ef4444'
+                          : selectedDetection.status === 'yellow'
+                            ? '#f59e0b'
+                            : '#22c55e',
                       }}
                     >
                       ● {selectedDetection.status.toUpperCase()}
                     </div>
                     <div className="detail-ri">
                       <span>RI Score</span>
-                      <strong style={{ color: selectedDetection.status === 'red' ? '#ef4444' : selectedDetection.status === 'yellow' ? '#f59e0b' : '#22c55e' }}>
-                        {selectedDetection.riScore} mcd/lx/m²
+                      <strong style={{
+                        color: selectedDetection.status === 'red'
+                          ? '#ef4444'
+                          : selectedDetection.status === 'yellow'
+                            ? '#f59e0b'
+                            : '#22c55e',
+                      }}>
+                        {selectedDetection.ri_score ?? selectedDetection.riScore} mcd/lx/m²
                       </strong>
                     </div>
                     {[
-                      ['Type', selectedDetection.label.replace('_', ' ')],
-                      ['Confidence', `${(selectedDetection.confidence * 100).toFixed(0)}%`],
-                      ['Weather', selectedDetection.weather.replace('_', ' ')],
-                      ['KM Marker', `KM ${selectedDetection.kmMarker}`],
-                      ['Latitude', `${selectedDetection.lat}°N`],
-                      ['Longitude', `${selectedDetection.lon}°E`],
-                      ['Captured', new Date(selectedDetection.capturedAt).toLocaleString('en-IN')],
+                      ['Type', (selectedDetection.label ?? '').replace('_', ' ')],
+                      ['Confidence', `${((selectedDetection.confidence ?? 0) * 100).toFixed(0)}%`],
+                      ['Weather', (selectedDetection.weather ?? '').replace('_', ' ')],
+                      ['KM Marker', `KM ${selectedDetection.km_marker ?? selectedDetection.kmMarker ?? 'N/A'}`],
+                      ['Latitude', selectedDetection.lat != null ? `${selectedDetection.lat}°` : 'N/A'],
+                      ['Longitude', selectedDetection.lon != null ? `${selectedDetection.lon}°` : 'N/A'],
+                      ['Captured', new Date(selectedDetection.captured_at ?? selectedDetection.capturedAt).toLocaleString()],
                     ].map(([k, v]) => (
                       <div className="detail-row" key={k}>
                         <span>{k}</span><strong>{v}</strong>
@@ -232,7 +297,7 @@ export default function App() {
           {tab === 'detections' && (
             <DetectionsTable filters={filters} onSelectDetection={setSelectedDetection} detections={detections} />
           )}
-          {tab === 'reports' && <ExportPanel detections={detections} summary={summary} />}
+          {tab === 'reports' && <ExportPanel detections={detections} summary={{ ...summary, totalKm }} />}
         </div>
       </main>
     </div>
